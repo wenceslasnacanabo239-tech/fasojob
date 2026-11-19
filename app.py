@@ -7,11 +7,14 @@ jobs = [
 ]
 ACCUEIL = """
 <html><head><meta name="viewport" content="width=device-width, initial-scale=1">
-<style>body{font-family:Arial;background:#FFF8E7;margin:0} .h{background:#008751;color:white;text-align:center;padding:20px} .c{background:white;margin:10px;padding:12px;border-left:5px solid #F7941D} .b{background:#008751;color:white;padding:8px 12px;text-decoration:none;display:inline-block;border-radius:5px} .o{background:#F7941D;color:white;padding:12px 20px;text-decoration:none;display:inline-block;border-radius:5px;font-weight:bold} .ct{text-align:center;margin:20px}</style></head>
+<style>body{font-family:Arial;background:#FFF8E7;margin:0} .h{background:#008751;color:white;text-align:center;padding:20px} .c{background:white;margin:10px;padding:12px;border-left:5px solid #F7941D} .b{background:#008751;color:white;padding:8px 12px;text-decoration:none;display:inline-block;border-radius:5px} .o{background:#F7941D;color:white;padding:12px 20px;text-decoration:none;display:inline-block;border-radius:5px;font-weight:bold} .ct{text-align:center;margin:20px} .s{width:80%;padding:12px;border:1px solid #ccc;border-radius:5px} .d{color:red;font-size:12px;text-decoration:none;margin-left:10px}</style></head>
 <body><div class="h"><h1>FASOJOB</h1><p>Emplois au Burkina Faso</p></div>
 <div class="ct"><a class="o" href="/publier">+ PUBLIER UNE OFFRE GRATUIT</a></div>
-{% for j in jobs %}<div class="c"><b>{{j.titre}} - {{j.ville}}</b><br>{{j.salaire}}<br>{% if j.desc %}<p>{{j.desc}}</p>{% endif %}
-{% if j.whatsapp %}<a class="b" href="https://wa.me/{{j.whatsapp}}">Postuler sur WhatsApp</a>{% else %}<a class="b" href="#">Postuler</a>{% endif %}</div>{% endfor %}
+<div class="ct"><form method="GET" action="/"><input class="s" name="q" value="{{q}}" placeholder="Rechercher: Chauffeur, Ouaga..."><br><br><button class="b" type="submit">Rechercher</button></form></div>
+{% for idx,j in jobs %}<div class="c"><b>{{j.titre}} - {{j.ville}}</b><br>{{j.salaire}}<br>{% if j.desc %}<p>{{j.desc}}</p>{% endif %}
+{% if j.whatsapp %}<a class="b" href="https://wa.me/{{j.whatsapp}}">Postuler sur WhatsApp</a>{% else %}<a class="b" href="#">Postuler</a>{% endif %}
+<a class="d" href="/supprimer/{{idx}}" onclick="return confirm('Supprimer cette offre ?')">Supprimer</a></div>{% endfor %}
+{% if not jobs %}<p style="text-align:center">Aucune offre trouvee.</p>{% endif %}
 <div class="ct"><a class="o" href="/publier">S'INSCRIRE GRATUIT</a></div></body></html>
 """
 PUBLIER = """
@@ -29,12 +32,22 @@ PUBLIER = """
 """
 @app.route("/")
 def home():
- return render_template_string(ACCUEIL, jobs=reversed(jobs))
+ q=request.args.get("q","").lower()
+ liste=list(enumerate(jobs))
+ liste=list(reversed(liste))
+ if q:
+  liste=[(i,j) for i,j in liste if q in j["titre"].lower() or q in j["ville"].lower() or q in j["desc"].lower()]
+ return render_template_string(ACCUEIL, jobs=liste, q=request.args.get("q",""))
 @app.route("/publier", methods=["GET","POST"])
 def publier():
  if request.method=="POST":
   jobs.append({"titre":request.form["titre"],"ville":request.form["ville"],"salaire":request.form["salaire"],"whatsapp":request.form["whatsapp"].replace(" ","").replace("+",""),"desc":request.form["desc"]})
   return redirect("/")
  return render_template_string(PUBLIER)
+@app.route("/supprimer/<int:id>")
+def supprimer(id):
+ if 0 <= id < len(jobs):
+  jobs.pop(id)
+ return redirect("/")
 if __name__=="__main__":
  app.run(host="0.0.0.0", port=10000)
