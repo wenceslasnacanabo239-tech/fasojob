@@ -61,13 +61,19 @@ def supprimer(id):
  return redirect("/")
 @app.route("/manifest.json")
 def manifest():
- return jsonify({"name":"FASOJOB","short_name":"FASOJOB","start_url":"/","display":"standalone","background_color":"#FFF8E7","theme_color":"#008751","icons":[{"src":"/icon.png","sizes":"512x512","type":"image/png"}]})
+ return jsonify({"name":"FASOJOB","short_name":"FASOJOB","start_url":"/","display":"standalone","background_color":"#FFF8E7","theme_color":"#008751","icons":[{"src":"/icon.png?v=2","sizes":"512x512","type":"image/png","purpose":"any"}]})
 @app.route("/sw.js")
 def sw():
  return Response("self.addEventListener('fetch',e=>{e.respondWith(fetch(e.request).catch(()=>caches.match(e.request)))})", mimetype="application/javascript")
 @app.route("/icon.png")
 def icon():
- img=Image.new("RGB",(512,512),"#008751"); d=ImageDraw.Draw(img); d.rectangle([20,20,492,492],outline="#F7941D",width=10); d.text((130,180),"F",fill="white"); d.text((90,320),"FASOJOB",fill="white")
+ img=Image.new("RGB",(512,512),"#008751"); d=ImageDraw.Draw(img)
+ try: f1=ImageFont.truetype("DejaVuSans-Bold.ttf",150); f2=ImageFont.truetype("DejaVuSans-Bold.ttf",62); f3=ImageFont.truetype("DejaVuSans-Bold.ttf",38)
+ except: f1=ImageFont.load_default(); f2=f1; f3=f1
+ d.rectangle([15,15,497,497],outline="#F7941D",width=12)
+ d.text((512/2,180),"F",font=f1,fill="white",anchor="mm")
+ d.text((512/2,330),"FASOJOB",font=f2,fill="white",anchor="mm")
+ d.text((512/2,400),"BURKINA",font=f3,fill="#F7941D",anchor="mm")
  buf=io.BytesIO(); img.save(buf,format="PNG"); buf.seek(0); return Response(buf.getvalue(), mimetype="image/png")
 if __name__=="__main__":
  app.run(host="0.0.0.0", port=10000)
