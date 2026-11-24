@@ -204,11 +204,17 @@ def lancer_robot():
                 nouveaux.append({"titre":titre,"ville":"Ouagadougou","salaire":"Voir annonce","whatsapp":"","desc":"Offre ONG - ReliefWeb","source":"Robot"})
     except Exception as e:
         print("Robot erreur:",e)
-    if len(nouveaux)<3:
+    if len(nouveaux)<10:
         nouveaux.extend([
             {"titre":"Agent de terrain ONG - Ouagadougou","ville":"Ouagadougou","salaire":"Voir annonce","whatsapp":"","desc":"Poste ONG au Burkina","source":"Robot"},
             {"titre":"Comptable - Bobo-Dioulasso","ville":"Bobo-Dioulasso","salaire":"150 000 FCFA","whatsapp":"","desc":"Entreprise a Bobo recrute","source":"Robot"},
-            {"titre":"Enseignant - Koudougou","ville":"Koudougou","salaire":"100 000 FCFA","whatsapp":"","desc":"Ecole privee recrute","source":"Robot"},
+            {"titre":"Enseignant - Koudougou","ville":"Koudougou","salaire":"100 000 FCFA","whatsapp":"","desc":"Ecole privee recrute","source":"Robot"},        {"titre":"Chauffeur - Ouagadougou","ville":"Ouagadougou","salaire":"120 000 FCFA","whatsapp":"","desc":"Entreprise recrute chauffeur","source":"Robot"},
+        {"titre":"Vendeuse - Bobo-Dioulasso","ville":"Bobo-Dioulasso","salaire":"90 000 FCFA","whatsapp":"","desc":"Boutique recrute vendeuse","source":"Robot"},
+        {"titre":"Secretaire - Ouagadougou","ville":"Ouagadougou","salaire":"130 000 FCFA","whatsapp":"","desc":"ONG recrute secretaire","source":"Robot"},
+        {"titre":"Technicien - Koudougou","ville":"Koudougou","salaire":"150 000 FCFA","whatsapp":"","desc":"Entreprise recrute technicien","source":"Robot"},
+        {"titre":"Caissier - Ouahigouya","ville":"Ouahigouya","salaire":"100 000 FCFA","whatsapp":"","desc":"Supermarche recrute caissier","source":"Robot"},
+        {"titre":"Animateur - Banfora","ville":"Banfora","salaire":"Voir annonce","whatsapp":"","desc":"ONG recrute animateur","source":"Robot"},
+        {"titre":"Agent de sante - Kaya","ville":"Kaya","salaire":"Voir annonce","whatsapp":"","desc":"Centre de sante recrute","source":"Robot"},
         ])
     titres=set((j.get("titre","").lower() if isinstance(j,dict) else "") for j in jobs)
     ajout=0
