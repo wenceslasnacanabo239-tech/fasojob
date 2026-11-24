@@ -10,9 +10,9 @@ HTML = """
 <title>FasoJob - Emplois au Burkina</title>
 <style>body{font-family:sans-serif;background:#f2f2f2;padding:15px} .card{background:white;padding:15px;border-radius:10px;margin:10px 0} .btn{background:#25D366;color:white;padding:10px 15px;border-radius:8px;text-decoration:none;display:inline-block} .top{background:#007bff;color:white;padding:20px;border-radius:10px;text-align:center}</style>
 </head><body>
-<div class="top"><h1>🇧🇫 FasoJob</h1><p>Emplois au Burkina Faso</p><a href="/ajouter" style="background:white;color:#007bff;padding:10px 15px;border-radius:8px;text-decoration:none">+ Ajouter une offre</a></div>
-<p><b>{total} offres</b> | <a href="/robot">🔄 Actualiser avec le robot</a></p>
-{jobs}
+<div class="top"><h1>FasoJob</h1><p>Emplois au Burkina Faso</p><a href="/ajouter" style="background:white;color:#007bff;padding:10px 15px;border-radius:8px;text-decoration:none">+ Ajouter une offre</a></div>
+<p><b>__TOTAL__ offres</b> | <a href="/robot">Actualiser avec le robot</a></p>
+__JOBS__
 </body></html>
 """
 
@@ -24,11 +24,16 @@ def home():
         if q and q not in (j.get("titre","") + j.get("ville","")).lower():
             continue
         wa = j.get("whatsapp","")
-        btn = f'<a class="btn" href="https://wa.me/{wa}">Postuler WhatsApp</a>' if wa else f'<a class="btn" href="#">Voir annonce</a>'
-        cards += f'<div class="card"><h3>{j.get("titre","")}</h3><p>📍 {j.get("ville","")} | 💰 {j.get("salaire","")}</p><p>{j.get("desc","")}</p><p><small>Source: {j.get("source","")}</small></p>{btn}</div>'
+        if wa:
+            btn = '<a class="btn" href="https://wa.me/' + wa + '">Postuler WhatsApp</a>'
+        else:
+            btn = '<a class="btn" href="#">Voir annonce</a>'
+        cards += '<div class="card"><h3>' + j.get("titre","") + '</h3><p>' + j.get("ville","") + ' | ' + j.get("salaire","") + '</p><p>' + j.get("desc","") + '</p><p><small>Source: ' + j.get("source","") + '</small></p>' + btn + '</div>'
     if not cards:
         cards = "<div class='card'><p>Aucune offre pour le moment. Appuie sur Actualiser avec le robot.</p></div>"
-    return HTML.format(total=len(JOBS), jobs=cards)
+    page = HTML.replace("__TOTAL__", str(len(JOBS)))
+    page = page.replace("__JOBS__", cards)
+    return page
 
 @app.route("/ajouter", methods=["GET","POST"])
 def ajouter():
@@ -92,8 +97,8 @@ def robot():
             JOBS.append(job)
             ajoutes += 1
     if ajoutes == 0:
-        return f"Aucune nouvelle vraie offre pour le moment. Total : {len(JOBS)} - <a href='/'>Retour</a>"
-    return f"Robot OK ! {ajoutes} vraies offres ajoutees. Total : {len(JOBS)} - <a href='/'>Voir les offres</a>"
+        return "Aucune nouvelle vraie offre pour le moment. Total : " + str(len(JOBS)) + " - <a href='/'>Retour</a>"
+    return "Robot OK ! " + str(ajoutes) + " vraies offres ajoutees. Total : " + str(len(JOBS)) + " - <a href='/'>Voir les offres</a>"
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
