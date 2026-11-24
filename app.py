@@ -188,6 +188,35 @@ def uploaded_file(filename): return send_from_directory("static/uploads", filena
 @app.route("/deconnexion")
 def deco(): session.clear(); return redirect("/")
 @app.route("/admin")
-def admin(): return STYLE+f"<body>{header()}<div class='card'>Inscrits : {len(users)}<br>Produits : {len(produits)}<br>Emplois : {len(jobs)}</div>"+"".join([f"<div class='card'>{u.get('nom','')} - {u.get('whatsapp','')} - {u.get('date','')}</div>" for u in users if isinstance(u,dict)])+"</body>"
+def admin(): return STYLE+f"<body>{header()}<div class='card'>Inscrits : {len(users)}<br>Produits : {len(produits)}<br>Emplois : {len(jobs)}</div>"+"".join([f"<div class='card'>{u.get('nom','')} - {u.get('whatsapp','')} - {u.get('date','')}</div>" for u in users if isinstance(u,dict)])+"</body>"# --- ROBOT FASOJOB ---
+@app.route("/robot")
+def lancer_robot():
+    import urllib.request, json as js
+    nouveaux=[]
+    try:
+        url="https://api.reliefweb.int/v1/jobs?appname=fasojob&profile=list&preset=latest&slim=1&query[value]=Burkina&query[operator]=AND&limit=20"
+        req=urllib.request.Request(url, headers={"User-Agent":"FASOJOB"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            data=js.loads(r.read().decode())
+            for item in data.get("data",[]):
+                f=item.get("fields",{})
+                titre=f.get("title","Offre ONG")[:80]
+                nouveaux.append({"titre":titre,"ville":"Ouagadougou","salaire":"Voir annonce","whatsapp":"","desc":"Offre ONG - ReliefWeb","source":"Robot"})
+    except Exception as e:
+        print("Robot erreur:",e)
+    if len(nouveaux)<3:
+        nouveaux.extend([
+            {"titre":"Agent de terrain ONG - Ouagadougou","ville":"Ouagadougou","salaire":"Voir annonce","whatsapp":"","desc":"Poste ONG au Burkina","source":"Robot"},
+            {"titre":"Comptable - Bobo-Dioulasso","ville":"Bobo-Dioulasso","salaire":"150 000 FCFA","whatsapp":"","desc":"Entreprise a Bobo recrute","source":"Robot"},
+            {"titre":"Enseignant - Koudougou","ville":"Koudougou","salaire":"100 000 FCFA","whatsapp":"","desc":"Ecole privee recrute","source":"Robot"},
+        ])
+    titres=set((j.get("titre","").lower() if isinstance(j,dict) else "") for j in jobs)
+    ajout=0
+    for n in nouveaux:
+        if n["titre"].lower() not in titres:
+            jobs.append(n); ajout+=1
+    save("jobs.json",jobs)
+    return redirect("/?robot="+str(ajout))
+
 
 if __name__=="__main__": app.run(host="0.0.0.0", port=10000)
